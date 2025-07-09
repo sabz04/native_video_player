@@ -19,6 +19,7 @@ class NativeVideoPlayerController implements NativeVideoPlayerFlutterApi {
   Duration _playbackPosition = Duration.zero;
   double _playbackSpeed = 1;
   double _volume = 1;
+  bool _isDisposed = false;
 
   /// A broadcast stream of playback events that can be listened to.
   ///
@@ -86,6 +87,7 @@ class NativeVideoPlayerController implements NativeVideoPlayerFlutterApi {
     _stopPlaybackPositionTimer();
     _eventSubscription?.cancel();
     _eventsController.close();
+    _isDisposed = true;
     NativeVideoPlayerFlutterApi.setUp(null);
   }
 
@@ -93,6 +95,7 @@ class NativeVideoPlayerController implements NativeVideoPlayerFlutterApi {
   @protected
   @override
   void onPlaybackEvent(PlaybackEvent event) {
+    if(_isDisposed == true || _playbackPositionTimer == null) return;
     _eventsController.add(event);
   }
 
@@ -240,8 +243,7 @@ extension PlaybackPositionTimer on NativeVideoPlayerController {
   }
 
   void _stopPlaybackPositionTimer() {
-    if (_playbackPositionTimer == null) return;
-    _playbackPositionTimer!.cancel();
+    _playbackPositionTimer?.cancel();
     _playbackPositionTimer = null;
   }
 
